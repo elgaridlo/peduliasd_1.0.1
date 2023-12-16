@@ -1,0 +1,30 @@
+{
+  "name": "Coba-coba",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server",
+    "server": "nodemon server"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.3.4",
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.2",
+    "concurrently": "^7.6.0",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.0",
+    "knex": "^2.4.2",
+    "lodash": "^4.17.21",
+    "multer": "1.4.5-lts.1",
+    "mysql2": "^3.2.0",
+    "nodemon": "^2.0.21",
+    "redis": "^4.6.5",
+    "uuid": "^9.0.0"
+  }
+}
