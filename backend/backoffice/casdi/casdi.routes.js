@@ -6,4 +6,4 @@ const router = express.Router();
 router.route('/members').get(getAllMembers).post(createMember);
 // router.route('/appointment').get(getAllProducts).post(createProducts);
 
-module.exports = router
+module.exports = router;

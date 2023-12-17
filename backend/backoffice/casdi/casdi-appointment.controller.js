@@ -1,19 +1,17 @@
-const catchAsync = require('../../utils/catchAsync.helper')
-const knex = require('../../config/configuration')
-const AppError = require('../../utils/appError');
+const catchAsync = require('../../utils/catchAsync.helper');
+const knex = require('../../config/configuration');
 
-exports.createProducts = catchAsync(async (req, res, next) => {
-  const insert = await knex('products')
-    .insert({
-      ...req.body
-    })
+exports.createProducts = catchAsync(async (req, res) => {
+  const insert = await knex('products').insert({
+    ...req.body,
+  });
 
-  const data = await knex.select('*').from('products').where('id', insert[0])
+  const data = await knex.select('*').from('products').where('id', insert[0]);
   res.status(201).json({
     status: 'Success',
-    data
-  })
-})
+    data,
+  });
+});
 
 // exports.getProductsById = catchAsync(async (req, res, next) => {
 //   const product = await knex('products').select().where({ id: req.params.id })
@@ -70,7 +68,7 @@ exports.createProducts = catchAsync(async (req, res, next) => {
 // exports.deleteProducts = catchAsync(async (req, res, next) => {
 //   await knex.transaction(async (trx) => {
 //     const del = await trx('products').where('id', req.params.id).del()
-  
+
 //     if (del === 0) {
 //       return next(new AppError('Product tidak ditemukan!', 404));
 //     }
@@ -78,7 +76,7 @@ exports.createProducts = catchAsync(async (req, res, next) => {
 //     res.status(200).json({
 //       status: 'Product berhasil dihapus.',
 //       data: null
-//     })    
+//     })
 //   })
 
 // })

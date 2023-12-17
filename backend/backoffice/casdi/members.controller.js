@@ -1,48 +1,71 @@
-const catchAsync = require('../../utils/catchAsync.helper')
-const knex = require('../../config/configuration')
+const catchAsync = require('../../utils/catchAsync.helper');
+const knex = require('../../config/configuration');
 const AppError = require('../../utils/appError');
 const { paginations } = require('../../utils/paginations');
-const { emailValidation, phoneValidation, nameValidation } = require('../../validates/format');
+const {
+  emailValidation,
+  phoneValidation,
+  nameValidation,
+} = require('../../validates/format');
 
 const validationCode = (body) => {
-    const pattern = /^[na]-\d{6}$/;
-    if(!pattern.test(body.code.toLowerCase()))
-        throw new AppError('Kode anggota harus berformat n atau a kemudian - kemudian 6 digit angka.', 400)
-    if((body.is_asd && body.code.toLowerCase().includes('n')) || 
-    (!body.is_asd && body.code.toLowerCase().includes('a')))
-        throw new AppError('Kode anggota dan kondisi tidak sesuai', 400)
-}
+  const pattern = /^[na]-\d{6}$/;
+  if (!pattern.test(body.code.toLowerCase()))
+    throw new AppError(
+      'Kode anggota harus berformat n atau a kemudian - kemudian 6 digit angka.',
+      400,
+    );
+  if (
+    (body.is_asd && body.code.toLowerCase().includes('n')) ||
+    (!body.is_asd && body.code.toLowerCase().includes('a'))
+  )
+    throw new AppError('Kode anggota dan kondisi tidak sesuai', 400);
+};
 
 const validation = (req) => {
-    emailValidation(req.body.email)
-    phoneValidation(req.body.phone_no)
-    nameValidation(req.body.parent_name)
-    nameValidation(req.body.kid_name)
-    validationCode(req.body)
-}
+  emailValidation(req.body.email);
+  phoneValidation(req.body.phone_no);
+  nameValidation(req.body.parent_name);
+  nameValidation(req.body.kid_name);
+  validationCode(req.body);
+};
 
 exports.createMember = catchAsync(async (req, res, next) => {
-    const {code,kid_name,parent_name,phone_no,email, is_asd} = req.body
-    if(!code || !kid_name || !phone_no || !email || !parent_name || is_asd === undefined) 
-        return next(new AppError('Tolong isi kode, nama anak, nama orang tua, no whatsapp, dan email', 400))
+  const { code, kid_name, parent_name, phone_no, email, is_asd } = req.body;
+  if (
+    !code ||
+    !kid_name ||
+    !phone_no ||
+    !email ||
+    !parent_name ||
+    is_asd === undefined
+  )
+    return next(
+      new AppError(
+        'Tolong isi kode, nama anak, nama orang tua, no whatsapp, dan email',
+        400,
+      ),
+    );
 
-    validation(req)
+  validation(req);
 
-    const insert = await knex('members')
-        .insert({
-            ...req.body,
-            code: code.toLowerCase(),
-            parent_name: parent_name.toLowerCase(),
-            kid_name: kid_name.toLowerCase(),
-            email: email.toLowerCase()
-        })
+  await knex('members').insert({
+    ...req.body,
+    code: code.toLowerCase(),
+    parent_name: parent_name.toLowerCase(),
+    kid_name: kid_name.toLowerCase(),
+    email: email.toLowerCase(),
+  });
 
-    const data = await knex.select('*').from('members').where('code', code.toLowerCase())
-    res.status(201).json({
-        status: 'Success',
-        data
-    })
-})
+  const data = await knex
+    .select('*')
+    .from('members')
+    .where('code', code.toLowerCase());
+  res.status(201).json({
+    status: 'Success',
+    data,
+  });
+});
 
 // exports.getMemberById = catchAsync(async (req, res, next) => {
 //   const product = await knex('products').select().where({ id: req.params.id })
@@ -57,23 +80,26 @@ exports.createMember = catchAsync(async (req, res, next) => {
 //   })
 // })
 
-exports.getAllMembers = catchAsync(async (req, res, next) => {
+exports.getAllMembers = catchAsync(async (req, res) => {
+  const { page, size, skip } = paginations(req.query.page, req.query.size);
 
-    const { page, size, skip } = paginations(req.query.page, req.query.size)
+  const members = await knex
+    .select('*')
+    .from('members')
+    .orderBy('is_asd', 'code')
+    .limit(size)
+    .offset(skip);
 
-    const members = await knex.select('*')
-        .from('members').orderBy('is_asd', 'code').limit(size).offset(skip)
-
-    res.status(200).json({
-        status: 'Success',
-        data: members,
-        page: {
-            rows: members.length,
-            size,
-            page
-        }
-    })
-})
+  res.status(200).json({
+    status: 'Success',
+    data: members,
+    page: {
+      rows: members.length,
+      size,
+      page,
+    },
+  });
+});
 
 // exports.updateProducts = catchAsync(async (req, res, next) => {
 //     const updt = await knex('products').where('id', req.params.id)
