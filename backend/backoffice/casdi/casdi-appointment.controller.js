@@ -1,82 +1,78 @@
 const catchAsync = require('../../utils/catchAsync.helper');
 const knex = require('../../config/configuration');
+const AppError = require('../../utils/appError');
+const { startOfDay } = require('date-fns');
+const { durations } = require('./helper');
 
-exports.createProducts = catchAsync(async (req, res) => {
-  const insert = await knex('products').insert({
+const appointmentDateValidate = (body) => {
+  const { appointment_date, duration } = body;
+  if (appointment_date < startOfDay(new Date()))
+    throw new AppError('Tanggal tidak boleh kurang dari tanggal sekarang.');
+
+  if (!durations.includes(duration))
+    throw new AppError('Jam kunjungan tidak sesuai.');
+};
+const durationValidate = (duration) => {
+  if (!durations.includes(duration))
+    throw new AppError('Durasi tidak dikenali.');
+};
+
+const logicDB = async (body) => {
+  const code_member = body.code_member.toLowerCase();
+  const { appointment_date, duration } = body;
+  const exists = await knex
+    .select('*')
+    .from('casdi_appointments')
+    .where('code_member', code_member);
+
+  if (exists.length > 0)
+    throw new AppError('Anggota sudah pernah melakukan kunjungan.');
+
+  const appointment_exist = await knex
+    .select('*')
+    .from('members')
+    .where('code', code_member);
+
+  if (appointment_exist.length === 0)
+    throw new AppError('Anggota tidak terdaftar.');
+
+  const durationAllReadyExist = await knex
+    .select('*')
+    .from('casdi_appointments')
+    .where('duration', duration)
+    .andWhere('appointment_date', appointment_date);
+
+  if (durationAllReadyExist.length > 0)
+    throw new AppError('Jadwal kunjungan sudah terisi.');
+};
+
+const validating = async (req) => {
+  appointmentDateValidate(req.body);
+  await logicDB(req.body);
+  durationValidate(req.body.duration);
+};
+
+exports.createAppointment = catchAsync(async (req, res, next) => {
+  const { code_member, appointment_date, duration } = req.body;
+  if (!code_member || !appointment_date || !duration)
+    return next(
+      new AppError(
+        'Tolong isi kode anggota, jadwal kunjungan, dan jam kunjungan',
+        400,
+      ),
+    );
+
+  await validating(req);
+  await knex('casdi_appointments').insert({
     ...req.body,
   });
 
-  const data = await knex.select('*').from('products').where('id', insert[0]);
+  const data = await knex
+    .select('*')
+    .from('casdi_appointments')
+    .where('code_member', code_member);
   res.status(201).json({
     status: 'Success',
     data,
   });
 });
-
-// exports.getProductsById = catchAsync(async (req, res, next) => {
-//   const product = await knex('products').select().where({ id: req.params.id })
-
-//   if (!product) {
-//     return next(new AppError('Product tidak ditemukan', 404))
-//   }
-
-//   res.status(200).json({
-//     status: 'Success',
-//     data: product[0],
-//   })
-// })
-
-// exports.getAllProducts = catchAsync(async (req, res, next) => {
-
-//   const page = req.query.page * 1 || 1; // || 1 mean the default is 1
-//   const size = req.query.size * 1 || 100;
-//   const skip = (page - 1) * size;
-
-//   const products = await knex.select('*')
-//     .from('products').orderBy('id', 'desc').limit(size).offset(skip)
-
-//   res.status(200).json({
-//     status: 'Success',
-//     data: products,
-//     page: {
-//       rows: products.length,
-//       size,
-//       page
-//     }
-//   })
-// })
-
-// exports.updateProducts = catchAsync(async (req, res, next) => {
-//   const updt = await knex('products').where('id', req.params.id)
-
-//   if (updt === 0)
-//     return next(new AppError('Program Edukasi tidak ditemukan!', 404));
-
-//   await knex('products').where('id', req.params.id)
-//     .update({
-//       ...req.body
-//     })
-
-//   const updated = await knex('products').where('id', req.params.id)
-
-//   res.status(201).json({
-//     status: 'Success',
-//     data: updated[0]
-//   })
-// })
-
-// exports.deleteProducts = catchAsync(async (req, res, next) => {
-//   await knex.transaction(async (trx) => {
-//     const del = await trx('products').where('id', req.params.id).del()
-
-//     if (del === 0) {
-//       return next(new AppError('Product tidak ditemukan!', 404));
-//     }
-
-//     res.status(200).json({
-//       status: 'Product berhasil dihapus.',
-//       data: null
-//     })
-//   })
-
-// })
