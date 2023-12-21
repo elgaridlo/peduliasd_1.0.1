@@ -6,13 +6,17 @@ const {
   updateArticle,
   getArticleById,
 } = require('./article.controller');
+const { protect, restrictTo } = require('../../auth/auth.controller');
 const router = express.Router();
 
-router.route('/').get(getAllArticle).post(createArticle);
+router
+  .route('/')
+  .get(getAllArticle)
+  .post(protect, restrictTo('admin'), createArticle);
 router
   .route('/:id')
   .get(getArticleById)
-  .put(updateArticle)
+  .put(protect, restrictTo('admin'), updateArticle)
   .delete(deleteArticle);
 
 module.exports = router;

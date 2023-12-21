@@ -1,7 +1,8 @@
-const jwt = require('jsonwebtoken');
 const knex = require('../config/configuration');
 const catchAsync = require('../utils/catchAsync.helper');
 const bycrpt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+
 const AppError = require('../utils/appError');
 const lodash = require('lodash');
 
@@ -12,7 +13,7 @@ const signToken = (id) => {
 };
 
 const createSendToken = async (user, statusCode, res) => {
-  const token = signToken(user._id);
+  const token = signToken(user.id);
 
   const cookieOptions = {
     expires: new Date(
@@ -92,7 +93,8 @@ const resetPassword = catchAsync(async (req, res, next) => {
 const restrictTo =
   (...roles) =>
   (req, res, next) => {
-    // roles['admin', 'lead-guide']. role='user'
+    console.log('roles = ', roles);
+    console.log('req.user = ', req.user);
     if (!roles.includes(req.user.role)) {
       return next(
         // 403 means forbidden
@@ -102,4 +104,46 @@ const restrictTo =
     next();
   };
 
-module.exports = { login, restrictTo, resetPassword };
+const protect = catchAsync(async (req, res, next) => {
+  let token;
+
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  ) {
+    token = req.headers.authorization.split(' ')[1];
+  } else if (req.cookies.jwt) {
+    token = req.cookies.jwt;
+  }
+
+  // 2 ) Verification token
+  if (!token) {
+    return next(
+      new AppError('You are not logged in ! Please login to get access.', 401),
+    );
+  }
+
+  const decoded = await jwt.verify(token, process.env.JWT_SECRET);
+
+  // 3 ) Check if user still exists
+  const currentUser = await knex
+    .select('*')
+    .from('auths')
+    .where('id', decoded.id)
+    .first();
+
+  if (!currentUser) {
+    return next(
+      new AppError(
+        'The User belonging to this token does no longer exist.',
+        401,
+      ),
+    );
+  }
+
+  req.user = currentUser;
+  // GRANT ACCESS TO THE PROTECTED ROUTE
+  next();
+});
+
+module.exports = { login, protect, restrictTo, resetPassword };
