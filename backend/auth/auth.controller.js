@@ -93,8 +93,6 @@ const resetPassword = catchAsync(async (req, res, next) => {
 const restrictTo =
   (...roles) =>
   (req, res, next) => {
-    console.log('roles = ', roles);
-    console.log('req.user = ', req.user);
     if (!roles.includes(req.user.role)) {
       return next(
         // 403 means forbidden

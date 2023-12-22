@@ -6,7 +6,7 @@
  */
 exports.paginations = (inPage, inSize) => {
   const page = inPage * 1 || 1; // || 1 mean the default is 1
-  const size = inSize * 1 || 100;
+  const size = inSize * 1 || 10;
   const skip = (page - 1) * size;
 
   return { page: page, size: size, skip: skip };

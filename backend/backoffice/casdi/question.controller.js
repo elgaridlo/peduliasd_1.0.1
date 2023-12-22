@@ -29,9 +29,16 @@ exports.getAllQuestions = catchAsync(async (req, res) => {
   const { page, size, skip } = paginations(req.query.page, req.query.size);
 
   const questions = await knex
-    .select('*')
-    .from('questions')
-    .orderBy('created_at')
+    .select(
+      'cq.id',
+      'cq.created_at',
+      'cq.updated_at',
+      'cq.question',
+      'ca.answer',
+    )
+    .from('casdi_questions as cq')
+    .leftJoin('casdi_answers as ca', 'cq.id', 'ca.question_id')
+    .orderBy('cq.created_at', 'desc')
     .limit(size)
     .offset(skip);
 
