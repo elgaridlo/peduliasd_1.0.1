@@ -35,6 +35,7 @@ exports.getAllQuestions = catchAsync(async (req, res) => {
       'cq.updated_at',
       'cq.question',
       'ca.answer',
+      'ca.updated_at as answer_updated_at',
     )
     .from('casdi_questions as cq')
     .leftJoin('casdi_answers as ca', 'cq.id', 'ca.question_id')
@@ -55,7 +56,7 @@ exports.getAllQuestions = catchAsync(async (req, res) => {
 
 exports.deleteQuestion = catchAsync(async (req, res, next) => {
   await knex.transaction(async (trx) => {
-    const del = await trx('casdi_questions').where('id', req.params.id).del();
+    const del = await trx('casdi_questions').where('id', req.body.id).del();
 
     if (del === 0) {
       return next(new AppError('Pertanyaan tidak ditemukan!', 404));

@@ -7,7 +7,11 @@ const {
   downloadCasdi,
 } = require('./casdi-appointment.controller');
 const { protect, restrictTo } = require('../../auth/auth.controller');
-const { createQuestion, getAllQuestions } = require('./question.controller');
+const {
+  createQuestion,
+  getAllQuestions,
+  deleteQuestion,
+} = require('./question.controller');
 const { createEditAnswer, deleteAnswer } = require('./answer.controller');
 const router = express.Router();
 
@@ -21,7 +25,11 @@ router
   .route('/appointments/download')
   .get(protect, restrictTo('admin'), downloadCasdi);
 
-router.route('/question').post(createQuestion).get(getAllQuestions);
+router
+  .route('/question')
+  .post(createQuestion)
+  .get(getAllQuestions)
+  .delete(protect, restrictTo('admin'), deleteQuestion);
 router
   .route('/answer')
   .post(protect, restrictTo('admin'), createEditAnswer)

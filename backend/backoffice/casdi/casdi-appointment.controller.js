@@ -140,7 +140,6 @@ exports.downloadCasdi = catchAsync(async (req, res) => {
   });
 
   stringify.stringify(formattedAppoints, { header: true }, (err, output) => {
-    console.log('check = ', output);
     if (err) {
       console.error(err);
       return res.status(500).send('Internal Server Error');

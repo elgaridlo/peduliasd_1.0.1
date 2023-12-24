@@ -8,6 +8,9 @@ exports.createEditAnswer = catchAsync(async (req, res, next) => {
   if (isEmptyObject(req.body) || !answer)
     return next(new AppError('Jawaban harus diisi', 400));
 
+  if (answer.length < 10)
+    return next(new AppError('Jawaban terlalu singkat', 400));
+
   if (!question_id)
     return next(new AppError('Isi pertanyaan yang akan dijawab.', 400));
 
