@@ -13,6 +13,13 @@ const {
   deleteQuestion,
 } = require('./question.controller');
 const { createEditAnswer, deleteAnswer } = require('./answer.controller');
+const {
+  getAllArticleCASDI,
+  createArticleCASDI,
+  getArticleCASDIById,
+  updateArticleCASDI,
+  deleteArticleCASDI,
+} = require('./casdi-article.controller');
 const router = express.Router();
 
 router
@@ -34,5 +41,15 @@ router
   .route('/answer')
   .post(protect, restrictTo('admin'), createEditAnswer)
   .delete(protect, restrictTo('admin'), deleteAnswer);
+
+router
+  .route('/')
+  .get(getAllArticleCASDI)
+  .post(protect, restrictTo('admin'), createArticleCASDI);
+router
+  .route('/:id')
+  .get(getArticleCASDIById)
+  .put(protect, restrictTo('admin'), updateArticleCASDI)
+  .delete(deleteArticleCASDI);
 
 module.exports = router;

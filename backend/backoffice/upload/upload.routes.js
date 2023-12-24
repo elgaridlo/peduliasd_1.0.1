@@ -47,4 +47,8 @@ router.post('/product', upload.single('image'), (req, res) => {
   res.send(`/${req.file.path}`);
 });
 
+router.post('/casdi', upload.single('image'), (req, res) => {
+  res.send(`/${req.file.path}`);
+});
+
 module.exports = router;
