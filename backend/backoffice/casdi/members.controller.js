@@ -9,15 +9,15 @@ const {
 } = require('../../validates/format');
 
 const validationCode = (body) => {
-  const pattern = /^[na]-\d{6}$/;
-  if (!pattern.test(body.code.toLowerCase()))
+  const pattern = /^[na]-\d{4}$/;
+  if (!pattern.test(body.code.toUpperCase()))
     throw new AppError(
-      'Kode anggota harus berformat n atau a kemudian - kemudian 6 digit angka.',
+      'Kode anggota harus berformat n atau a kemudian - kemudian 4 digit angka.',
       400,
     );
   if (
-    (body.is_asd && body.code.toLowerCase().includes('n')) ||
-    (!body.is_asd && body.code.toLowerCase().includes('a'))
+    (body.is_asd && body.code.toUpperCase().includes('n')) ||
+    (!body.is_asd && body.code.toUpperCase().includes('a'))
   )
     throw new AppError('Kode anggota dan kondisi tidak sesuai', 400);
 };
@@ -51,7 +51,7 @@ exports.createMember = catchAsync(async (req, res, next) => {
 
   await knex('members').insert({
     ...req.body,
-    code: code.toLowerCase(),
+    code: code.toUpperCase(),
     parent_name: parent_name.toLowerCase(),
     kid_name: kid_name.toLowerCase(),
     email: email.toLowerCase(),
@@ -60,7 +60,7 @@ exports.createMember = catchAsync(async (req, res, next) => {
   const data = await knex
     .select('*')
     .from('members')
-    .where('code', code.toLowerCase());
+    .where('code', code.toUpperCase());
   res.status(201).json({
     status: 'Success',
     data,

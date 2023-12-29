@@ -66,7 +66,7 @@ exports.createAppointment = catchAsync(async (req, res, next) => {
   await validating(req);
   await knex('casdi_appointments').insert({
     ...req.body,
-    code_member: appointment_date.toUpperCase(),
+    code_member: code_member.toUpperCase(),
   });
 
   const data = await knex
