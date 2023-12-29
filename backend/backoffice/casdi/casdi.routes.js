@@ -43,11 +43,11 @@ router
   .delete(protect, restrictTo('admin'), deleteAnswer);
 
 router
-  .route('/')
+  .route('/article')
   .get(getAllArticleCASDI)
   .post(protect, restrictTo('admin'), createArticleCASDI);
 router
-  .route('/:id')
+  .route('/article/:id')
   .get(getArticleCASDIById)
   .put(protect, restrictTo('admin'), updateArticleCASDI)
   .delete(deleteArticleCASDI);

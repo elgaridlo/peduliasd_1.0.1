@@ -60,13 +60,13 @@ exports.getAllArticleCASDI = catchAsync(async (req, res) => {
 });
 
 exports.updateArticleCASDI = catchAsync(async (req, res, next) => {
-  const updt = await knex('casdi_articles').where('id', req.params.id);
+  const updt = await knex('casdi_articles').where('urlTitle', req.params.id);
 
   if (updt === 0)
     return next(new AppError('Program Edukasi tidak ditemukan!', 404));
 
   await knex('casdi_articles')
-    .where('id', req.params.id)
+    .where('urlTitle', req.params.id)
     .update({
       ...req.body,
       urlTitle: req.body.title
@@ -75,7 +75,7 @@ exports.updateArticleCASDI = catchAsync(async (req, res, next) => {
         .replaceAll(' ', '-'),
     });
 
-  const updated = await knex('casdi_articles').where('id', req.params.id);
+  const updated = await knex('casdi_articles').where('urlTitle', req.params.id);
 
   res.status(201).json({
     status: 'Success',
