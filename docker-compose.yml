@@ -1,0 +1,15 @@
+version: "3.9"
+
+services:
+  db_mysql:
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_DATABASE: peduliasd
+      MYSQL_USER: asd
+      MYSQL_PASSWORD: asd
+      MYSQL_ROOT_PASSWORD: asd
+    ports:
+      - '3306:3306'
+    volumes:
+      - ./scripts:/docker-entrypoint-initdb.d

@@ -129,7 +129,7 @@ exports.downloadCasdi = catchAsync(async (req, res) => {
       kid_name: appoint.kid_name,
       is_asd: appoint.is_asd ? 'ASD' : 'NON ASD',
       parent_name: appoint.parent_name,
-      phone_no: appoint.phone_no,
+      phone_no: `="${appoint.phone_no}"`,
       email: appoint.email,
       created_at: new Date(appoint.created_at).toLocaleDateString('en-GB', {
         day: '2-digit',
